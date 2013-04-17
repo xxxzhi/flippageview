@@ -727,23 +727,23 @@ public class FlipVerticalPageLayout extends FrameLayout {
 			arc = arc * Math.PI / 360;			//变成弧度制
 			Path path = new Path();
 			double r = Math.sqrt(px * px + py * py);			//顶点与触摸点的距离
-			double p1 = contentWidth - r / (2 * Math.cos(arc));			//X方向的点
-			double p2 = r / (2 * Math.sin(arc));						//y 方向的点
+			double p1 = contentWidth - r / (2 * Math.sin(arc));			//x方向的点
+			double p2 = r / (2 * Math.cos(arc));						//y方向的点
 			Log.d(TAG, "p1: " + p1 + " p2:" + p2);
-			if (arc >= Math.PI/2-0.001) {
+			if (arc ==0) {
 				//相当于水平或者垂直滑动
-				path.moveTo(0, 0);
+				path.moveTo(0f, contentHeight);
 				path.lineTo(0f, (float)p2);
 				path.lineTo(contentWidth, (float)p2);
-				path.lineTo(contentWidth, 0);
+				path.lineTo(contentWidth, contentHeight);
 				path.close();
 			} else if (p1 > contentWidth || p1 < 0) {
 				//超出时绘制
 				double p3 = contentHeight - (p1 - contentWidth) * Math.tan(arc);
-				path.moveTo(0, 0);
-				path.lineTo((float) p1, 0);
-				path.lineTo((float) p3, contentHeight);
-				path.lineTo(0, contentHeight);
+				path.moveTo(0f, contentHeight);
+				path.lineTo((float) p3, 0);
+				path.lineTo(contentWidth, (float)p2);
+				path.lineTo(contentWidth, contentHeight);
 				path.close();
 			} else {
 				path.moveTo(0, 0);
@@ -792,6 +792,7 @@ public class FlipVerticalPageLayout extends FrameLayout {
 			}
 			return null;
 		}
+		
 		public void drawRB(Canvas canvas) {
 			double dx = scrollX, dy = contentHeight - scrollY;
 			double len = Math.sqrt(dx * dx + dy * dy);
@@ -802,7 +803,7 @@ public class FlipVerticalPageLayout extends FrameLayout {
 
 			double px = contentWidth - scrollX;
 			double py = contentHeight - scrollY;
-			double arc = 2 * Math.atan(py / px) * 180 / Math.PI;
+			double arc = 2 * Math.atan(px / py) * 180 / Math.PI;
 
 			Matrix m = new Matrix();
 			m.postTranslate(scrollX, scrollY - contentHeight);
@@ -830,28 +831,28 @@ public class FlipVerticalPageLayout extends FrameLayout {
 			arc = arc * Math.PI / 360;
 			Path path = new Path();
 			double r = Math.sqrt(px * px + py * py);
-			double p1 = contentWidth - r / (2 * Math.cos(arc));
-			double p2 = r / (2 * Math.sin(arc));
+			double p1 = contentWidth - r / (2 * Math.sin(arc));
+			double p2 = contentHeight - r / (2 * Math.cos(arc));
 			Log.d(TAG, "p1: " + p1 + " p2:" + p2);
 			if (arc == 0) {
 				path.moveTo(0, 0);
-				path.lineTo((float) p1, 0);
-				path.lineTo((float) p1, contentHeight);
-				path.lineTo(0, contentHeight);
+				path.lineTo(0f, (float)p2);
+				path.lineTo(contentWidth, (float)p2);
+				path.lineTo(contentWidth, 0f);
 				path.close();
-			} else if (p2 > contentHeight || p2 < 0) {
-				double p3 = contentWidth - (p2 - contentHeight) * Math.tan(arc);
+			} else if (p1 <0 || p1>contentWidth) {
+				double p3 = contentHeight - (-p1 ) * Math.tan(arc);
 				path.moveTo(0, 0);
-				path.lineTo((float) p3, 0);
-				path.lineTo((float) p1, contentHeight);
-				path.lineTo(0, contentHeight);
+				path.lineTo(0, (float)p3);
+				path.lineTo(contentWidth, (float)p2);
+				path.lineTo(contentWidth,0);
 				path.close();
 			} else {
 				path.moveTo(0, 0);
-				path.lineTo(contentWidth, 0);
-				path.lineTo(contentWidth, contentHeight - (float) p2);
-				path.lineTo((float) p1, contentHeight);
 				path.lineTo(0, contentHeight);
+				path.lineTo((float) p1, contentHeight);
+				path.lineTo(contentWidth, (float)p2);
+				path.lineTo(contentWidth,0);
 				path.close();
 			}
 			mCanvas.drawPath(path, ivisiblePaint);

@@ -23,16 +23,25 @@ public class MainActivity extends Activity {
 		iv.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 		iv.setImageResource(R.drawable.back);
 		iv.setId(1);
-//		final FlipPageLayout crawl = new FlipPageLayout(activity);
-//		crawl.setLayoutParams(new android.widget.FrameLayout.LayoutParams(
-//				(int) activity.getResources().getDimension(R.dimen.top_window_width),
-//				(int) activity.getResources().getDimension(R.dimen.top_window_width)));
-//		crawl.addView(v);
-//		flip.addView(iv);
 		View v= flip.findViewById(R.id.imageView1);
 		if(v==null){
 			Log.i("tag","v is null");
 		}
+		
+		
+		
+//		FlipVerticalPageLayout flip = (FlipVerticalPageLayout) findViewById(R.id.flip);
+//		if(flip==null){
+//			Log.i("tag","flip is null");
+//		}
+//		ImageView iv = new ImageView(this);
+//		iv.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+//		iv.setImageResource(R.drawable.back);
+//		iv.setId(1);
+//		View v= flip.findViewById(R.id.imageView1);
+//		if(v==null){
+//			Log.i("tag","v is null");
+//		}
 	}
 
 	@Override
