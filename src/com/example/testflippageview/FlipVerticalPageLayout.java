@@ -371,7 +371,7 @@ public class FlipVerticalPageLayout extends FrameLayout {
 					if (velocityX < 0) {
 						aniStopPos = new Point(0, 0);
 					} else {
-						aniStopPos = new Point(0, 0);
+						aniStopPos = new Point(0, 2*contentHeight);
 					}
 				} else if (mSelectCorner == Corner.RightTop) {
 					if (velocityX < 0) {
