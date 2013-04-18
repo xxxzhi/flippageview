@@ -182,9 +182,8 @@ public class FlipPageLayout extends FrameLayout {
 			this.addView(mainLayout);
 
 			mBookView = new BookView(mContext);
-//			mBookView.setLayoutParams(new LayoutParams(contentWidth,
-//					contentHeight));
-			// mBookView.setBackgroundColor(Color.argb(255, 255, 0, 0));
+			mBookView.setLayoutParams(new LayoutParams(contentWidth,
+					contentHeight));
 			this.addView(mBookView);
 
 			updatePageView();
@@ -469,14 +468,14 @@ public class FlipPageLayout extends FrameLayout {
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		super.onLayout(changed, l, t, r, b);
 //
-//		contentWidth = this.getWidth();
-//		contentHeight = this.getHeight();
-//		if (contentWidth == 0)
-//			contentWidth = defaultWidth;
-//		if (contentHeight == 0)
-//			contentHeight = defaultHeight;
-//		Log.d(LOG_TAG, "onLayout, width:" + contentWidth + " height:"
-//				+ contentHeight);
+		contentWidth = this.getWidth();
+		contentHeight = this.getHeight();
+		if (contentWidth == 0)
+			contentWidth = defaultWidth;
+		if (contentHeight == 0)
+			contentHeight = defaultHeight;
+		Log.d(TAG, "onLayout, width:" + contentWidth + " height:"
+				+ contentHeight);
 	}
 
 	private OnTouchListener mTouchListener = null;
