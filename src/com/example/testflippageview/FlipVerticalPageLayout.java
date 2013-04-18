@@ -739,7 +739,11 @@ public class FlipVerticalPageLayout extends FrameLayout {
 				path.close();
 			} else if (p1 > contentWidth || p1 < 0) {
 				//超出时绘制
-				double p3 = contentHeight - (p1 - contentWidth) * Math.tan(arc);
+				double p3 ;
+				if(p1<0)
+					p3= (-p1) * Math.tan(arc);
+				else
+					p3=(p1-contentWidth)*Math.tan(arc);
 				path.moveTo(0f, contentHeight);
 				path.lineTo((float) p3, 0);
 				path.lineTo(contentWidth, (float)p2);
