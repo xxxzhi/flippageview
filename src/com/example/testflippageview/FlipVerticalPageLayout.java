@@ -195,8 +195,8 @@ public class FlipVerticalPageLayout extends FrameLayout {
 			this.addView(mainLayout);
 
 			mBookView = new BookView(mContext);
-//			mBookView.setLayoutParams(new LayoutParams(contentWidth,
-//					contentHeight));
+			mBookView.setLayoutParams(new LayoutParams(contentWidth,
+					contentHeight));
 			// mBookView.setBackgroundColor(Color.argb(255, 255, 0, 0));
 			this.addView(mBookView);
 
@@ -297,23 +297,24 @@ public class FlipVerticalPageLayout extends FrameLayout {
 					if (scrollX < contentWidth / 2) {
 						aniStopPos = new Point(0, 0);
 					} else {
-						aniStopPos = new Point(2 * contentWidth, 0);
+						//因为计算的时候分界线是一半，所以这里取的是两倍。才能到达全部翻页完
+						aniStopPos = new Point(0, 2*contentHeight);
 					}
 				} else if (mSelectCorner == Corner.RightTop) {
 					if (scrollX < contentWidth / 2) {
-						aniStopPos = new Point(-contentWidth, 0);
-					} else {
 						aniStopPos = new Point(contentWidth, 0);
+					} else {
+						aniStopPos = new Point(contentWidth, 2*contentHeight);
 					}
 				} else if (mSelectCorner == Corner.LeftBottom) {
 					if (scrollX < contentWidth / 2) {
-						aniStopPos = new Point(0, contentHeight);
+						aniStopPos = new Point(0, 0);
 					} else {
-						aniStopPos = new Point(2 * contentWidth, contentHeight);
+						aniStopPos = new Point(0, contentHeight);
 					}
 				} else if (mSelectCorner == Corner.RightBottom) {
 					if (scrollX < contentWidth / 2) {
-						aniStopPos = new Point(-contentWidth, contentHeight);
+						aniStopPos = new Point(contentWidth, -contentHeight);
 					} else {
 						aniStopPos = new Point(contentWidth, contentHeight);
 					}
@@ -368,26 +369,27 @@ public class FlipVerticalPageLayout extends FrameLayout {
 					+ velocityY);
 			if (mSelectCorner != Corner.None) {
 				if (mSelectCorner == Corner.LeftTop) {
-					if (velocityX < 0) {
+					if (velocityY < 0) {
 						aniStopPos = new Point(0, 0);
 					} else {
+						//因为计算的时候分界线是一半，所以这里取的是两倍。才能到达全部翻页完
 						aniStopPos = new Point(0, 2*contentHeight);
 					}
 				} else if (mSelectCorner == Corner.RightTop) {
-					if (velocityX < 0) {
-						aniStopPos = new Point(-contentWidth, 0);
-					} else {
+					if (velocityY < 0) {//回滚
 						aniStopPos = new Point(contentWidth, 0);
+					} else {
+						aniStopPos = new Point(contentWidth, 2*contentHeight);
 					}
 				} else if (mSelectCorner == Corner.LeftBottom) {
-					if (velocityX < 0) {
-						aniStopPos = new Point(0, contentHeight);
+					if (velocityY < 0) {
+						aniStopPos = new Point(0, 0);
 					} else {
-						aniStopPos = new Point(2 * contentWidth, contentHeight);
+						aniStopPos = new Point(0, contentHeight);
 					}
 				} else if (mSelectCorner == Corner.RightBottom) {
-					if (velocityX < 0) {
-						aniStopPos = new Point(-contentWidth, contentHeight);
+					if (velocityY < 0) {
+						aniStopPos = new Point(contentWidth, -contentHeight);
 					} else {
 						aniStopPos = new Point(contentWidth, contentHeight);
 					}
@@ -430,23 +432,24 @@ public class FlipVerticalPageLayout extends FrameLayout {
 					if (scrollX < contentWidth / 2) {
 						aniStopPos = new Point(0, 0);
 					} else {
-						aniStopPos = new Point(2 * contentWidth, 0);
+						//因为计算的时候分界线是一半，所以这里取的是两倍。才能到达全部翻页完
+						aniStopPos = new Point(0, 2*contentHeight);
 					}
 				} else if (mSelectCorner == Corner.RightTop) {
 					if (scrollX < contentWidth / 2) {
-						aniStopPos = new Point(-contentWidth, 0);
-					} else {
 						aniStopPos = new Point(contentWidth, 0);
+					} else {
+						aniStopPos = new Point(contentWidth, 2*contentHeight);
 					}
 				} else if (mSelectCorner == Corner.LeftBottom) {
 					if (scrollX < contentWidth / 2) {
-						aniStopPos = new Point(0, contentHeight);
+						aniStopPos = new Point(0, 0);
 					} else {
-						aniStopPos = new Point(2 * contentWidth, contentHeight);
+						aniStopPos = new Point(0, contentHeight);
 					}
 				} else if (mSelectCorner == Corner.RightBottom) {
 					if (scrollX < contentWidth / 2) {
-						aniStopPos = new Point(-contentWidth, contentHeight);
+						aniStopPos = new Point(contentWidth, -contentHeight);
 					} else {
 						aniStopPos = new Point(contentWidth, contentHeight);
 					}
@@ -481,15 +484,15 @@ public class FlipVerticalPageLayout extends FrameLayout {
 	@Override
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		super.onLayout(changed, l, t, r, b);
-//
-//		contentWidth = this.getWidth();
-//		contentHeight = this.getHeight();
-//		if (contentWidth == 0)
-//			contentWidth = defaultWidth;
-//		if (contentHeight == 0)
-//			contentHeight = defaultHeight;
-//		Log.d(LOG_TAG, "onLayout, width:" + contentWidth + " height:"
-//				+ contentHeight);
+
+		contentWidth = this.getWidth();
+		contentHeight = this.getHeight();
+		if (contentWidth == 0)
+			contentWidth = defaultWidth;
+		if (contentHeight == 0)
+			contentHeight = defaultHeight;
+		Log.d(TAG, "onLayout, width:" + contentWidth + " height:"
+				+ contentHeight);
 	}
 
 	private OnTouchListener mTouchListener = null;

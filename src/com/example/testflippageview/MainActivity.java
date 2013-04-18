@@ -14,34 +14,6 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
-		FlipVerticalPageLayout flip = (FlipVerticalPageLayout) findViewById(R.id.flip);
-		if(flip==null){
-			Log.i("tag","flip is null");
-		}
-		ImageView iv = new ImageView(this);
-		iv.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-		iv.setImageResource(R.drawable.back);
-		iv.setId(1);
-		View v= flip.findViewById(R.id.imageView1);
-		if(v==null){
-			Log.i("tag","v is null");
-		}
-		
-		
-		
-//		FlipVerticalPageLayout flip = (FlipVerticalPageLayout) findViewById(R.id.flip);
-//		if(flip==null){
-//			Log.i("tag","flip is null");
-//		}
-//		ImageView iv = new ImageView(this);
-//		iv.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-//		iv.setImageResource(R.drawable.back);
-//		iv.setId(1);
-//		View v= flip.findViewById(R.id.imageView1);
-//		if(v==null){
-//			Log.i("tag","v is null");
-//		}
 	}
 
 	@Override
