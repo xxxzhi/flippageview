@@ -294,14 +294,14 @@ public class FlipVerticalPageLayout extends FrameLayout {
 				if (mState == BookState.ANIMATING)
 					return false;
 				if (mSelectCorner == Corner.LeftTop) {
-					if (scrollX < contentWidth / 2) {
+					if (scrollY < contentHeight / 2) {
 						aniStopPos = new Point(0, 0);
 					} else {
 						//因为计算的时候分界线是一半，所以这里取的是两倍。才能到达全部翻页完
 						aniStopPos = new Point(0, 2*contentHeight);
 					}
 				} else if (mSelectCorner == Corner.RightTop) {
-					if (scrollX < contentWidth / 2) {
+					if (scrollY < contentHeight / 2) {
 						aniStopPos = new Point(contentWidth, 0);
 					} else {
 						aniStopPos = new Point(contentWidth, 2*contentHeight);
@@ -324,6 +324,7 @@ public class FlipVerticalPageLayout extends FrameLayout {
 				mState = BookState.ABOUT_TO_ANIMATE;
 				closeBook = true;
 				aniStartTime = new Date();
+				Log.d(TAG, "up startAnimation");
 				mBookView.startAnimation();
 			}
 
@@ -382,13 +383,13 @@ public class FlipVerticalPageLayout extends FrameLayout {
 						aniStopPos = new Point(contentWidth, 2*contentHeight);
 					}
 				} else if (mSelectCorner == Corner.LeftBottom) {
-					if (velocityY < 0) {
+					if (velocityY < 0) { //翻页
 						aniStopPos = new Point(0, 0);
 					} else {
 						aniStopPos = new Point(0, contentHeight);
 					}
 				} else if (mSelectCorner == Corner.RightBottom) {
-					if (velocityY < 0) {
+					if (velocityY < 0) {//翻页
 						aniStopPos = new Point(contentWidth, -contentHeight);
 					} else {
 						aniStopPos = new Point(contentWidth, contentHeight);
@@ -415,6 +416,8 @@ public class FlipVerticalPageLayout extends FrameLayout {
 			if (mSelectCorner != Corner.None) {
 				scrollX = e2.getX();
 				scrollY = e2.getY();
+				Log.d(TAG,"scroll animation");
+				Log.d(TAG,"scrollx:"+scrollX+","+" scrolly:"+scrollY);
 				mBookView.startAnimation();
 			}
 			return false;
@@ -695,33 +698,33 @@ public class FlipVerticalPageLayout extends FrameLayout {
 		public void drawRT(Canvas canvas) {
 			double dx = scrollX, dy = scrollY;
 			double len = Math.sqrt(dx * dx + dy * dy);
-			if (len > contentWidth) {
-				scrollX = (float) (contentWidth * dx / len);
-				scrollY = (float) (contentWidth * dy / len);
+			if (len > contentHeight) {			//目的似乎很大，没明白
+				scrollX = (float) (contentHeight * dx / len);
+				scrollY = (float) (contentHeight * dy / len);
 			}
 			//计算点击点距离最近顶点的x,y的距离
 			double px = contentWidth - scrollX;
 			double py = scrollY;
 			double arc = 2 * Math.atan(px / py) * 180 / Math.PI;
-
+			Log.d(TAG,"px:"+px+" py:"+py+" arc:"+arc);
 			Matrix m = new Matrix();
-			m.postTranslate(scrollX, scrollY);
-			m.postRotate((float) (-arc), scrollX, scrollY);
-
+			m.postTranslate(scrollX, scrollY-contentHeight);
+			m.postRotate((float) (-(90-arc)), scrollX, scrollY);
+			
 			middlePage.draw(mCanvas);
-
 			Paint ps = new Paint();
-			Shader lg1 = new LinearGradient(0, 0, (float) px, (float) py,
+			Shader lg1 = new LinearGradient(0, 0,
+					(float) px, (float) py,
 					new int[] { 0x00000000, 0x33000000, 0x00000000 },
 					new float[] { 0.35f, 0.5f, 0.65f }, Shader.TileMode.CLAMP);
 			ps.setShader(lg1);
 			mCanvas.drawRect(0, 0, contentWidth, contentHeight, ps);
 			canvas.drawBitmap(tmpBmp, m, bmpPaint);
-
+			
 			nextPage.draw(mCanvas);
 			//阴影
-			Shader lg2 = new LinearGradient(scrollX - contentWidth, scrollY,
-					contentWidth, 0, new int[] { 0x00000000, 0x33000000,
+			Shader lg2 = new LinearGradient( contentWidth, 0,
+					contentWidth - (float) px,(float) py,  new int[] { 0x00000000, 0x33000000,
 							0x00000000 }, new float[] { 0.35f, 0.5f, 0.65f },
 					Shader.TileMode.CLAMP);
 			ps.setShader(lg2);
@@ -732,7 +735,9 @@ public class FlipVerticalPageLayout extends FrameLayout {
 			double r = Math.sqrt(px * px + py * py);			//顶点与触摸点的距离
 			double p1 = contentWidth - r / (2 * Math.sin(arc));			//x方向的点
 			double p2 = r / (2 * Math.cos(arc));						//y方向的点
-			Log.d(TAG, "p1: " + p1 + " p2:" + p2);
+			Log.d(TAG, "p1: " + p1 + " p2:" + p2+" math.sin:"+Math.sin(arc)+" r:"+r);
+			Log.d(TAG,"contentWidth:"+contentWidth);
+			double p3 =0;
 			if (arc ==0) {
 				//相当于水平或者垂直滑动
 				path.moveTo(0f, contentHeight);
@@ -742,13 +747,12 @@ public class FlipVerticalPageLayout extends FrameLayout {
 				path.close();
 			} else if (p1 > contentWidth || p1 < 0) {
 				//超出时绘制
-				double p3 ;
 				if(p1<0)
 					p3= (-p1) * Math.tan(arc);
 				else
 					p3=(p1-contentWidth)*Math.tan(arc);
 				path.moveTo(0f, contentHeight);
-				path.lineTo((float) p3, 0);
+				path.lineTo( 0,(float) p3);
 				path.lineTo(contentWidth, (float)p2);
 				path.lineTo(contentWidth, contentHeight);
 				path.close();
@@ -760,6 +764,7 @@ public class FlipVerticalPageLayout extends FrameLayout {
 				path.lineTo(0, contentHeight);
 				path.close();
 			}
+			Log.i(TAG,p1+","+p2+","+p3+","+scrollX+","+scrollY);
 			mCanvas.drawPath(path, ivisiblePaint);
 			canvas.drawBitmap(tmpBmp, 0, 0, null);
 		}
