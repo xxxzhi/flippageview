@@ -291,8 +291,8 @@ public class FlipVerticalPageLayout extends FrameLayout {
 			int action = event.getAction();
 			if (action == MotionEvent.ACTION_UP && mSelectCorner != Corner.None
 					&& mState == BookState.TRACKING) {
-				if (mState == BookState.ANIMATING)
-					return false;
+//				if (mState == BookState.ANIMATING)
+//					return false;
 				if (mSelectCorner == Corner.LeftTop) {
 					if (scrollY < contentHeight / 2) {
 						aniStopPos = new Point(0, 0);
@@ -308,7 +308,7 @@ public class FlipVerticalPageLayout extends FrameLayout {
 					}
 				} else if (mSelectCorner == Corner.LeftBottom) {
 					if (scrollX < contentWidth / 2) {
-						aniStopPos = new Point(0, 0);
+						aniStopPos = new Point(0, -contentHeight);
 					} else {
 						aniStopPos = new Point(0, contentHeight);
 					}
@@ -332,142 +332,6 @@ public class FlipVerticalPageLayout extends FrameLayout {
 		}
 	};
 	
-	class BookOnGestureListener implements OnGestureListener {
-		public boolean onDown(MotionEvent event) {
-			Log.d(TAG, "onDown");
-			if (mState == BookState.ANIMATING)
-				return false;
-			float x = event.getX(), y = event.getY();
-			int w = contentWidth, h = contentHeight;
-			if (x * x + y * y < clickCornerLen) {
-				mSelectCorner = Corner.LeftTop;
-				aniStartPos = new Point(0, 0);
-			} else if ((x - w) * (x - w) + y * y < clickCornerLen) {
-				mSelectCorner = Corner.RightTop;
-				aniStartPos = new Point(contentWidth, 0);
-			} else if (x * x + (y - h) * (y - h) < clickCornerLen) {
-				mSelectCorner = Corner.LeftBottom;
-				aniStartPos = new Point(0, contentHeight);
-			} else if ((x - w) * (x - w) + (y - h) * (y - h) < clickCornerLen) {
-				mSelectCorner = Corner.RightBottom;
-				aniStartPos = new Point(contentWidth, contentHeight);
-			}
-			if (mSelectCorner != Corner.None) {
-				aniStopPos = new Point((int) x, (int) y);
-				aniTime = 800;
-				mState = BookState.ABOUT_TO_ANIMATE;
-				closeBook = false;
-				aniStartTime = new Date();
-				mBookView.startAnimation();
-			}
-			Log.i("ondown", "ondown");
-			return false;
-		}
-
-		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
-				float velocityY) {
-			Log.d(TAG, "onFling velocityX:" + velocityX + " velocityY:"
-					+ velocityY);
-			if (mSelectCorner != Corner.None) {
-				if (mSelectCorner == Corner.LeftTop) {
-					if (velocityY < 0) {
-						aniStopPos = new Point(0, 0);
-					} else {
-						//因为计算的时候分界线是一半，所以这里取的是两倍。才能到达全部翻页完
-						aniStopPos = new Point(0, 2*contentHeight);
-					}
-				} else if (mSelectCorner == Corner.RightTop) {
-					if (velocityY < 0) {//回滚
-						aniStopPos = new Point(contentWidth, 0);
-					} else {
-						aniStopPos = new Point(contentWidth, 2*contentHeight);
-					}
-				} else if (mSelectCorner == Corner.LeftBottom) {
-					if (velocityY < 0) { //翻页
-						aniStopPos = new Point(0, 0);
-					} else {
-						aniStopPos = new Point(0, contentHeight);
-					}
-				} else if (mSelectCorner == Corner.RightBottom) {
-					if (velocityY < 0) {//翻页
-						aniStopPos = new Point(contentWidth, -contentHeight);
-					} else {
-						aniStopPos = new Point(contentWidth, contentHeight);
-					}
-				}
-				Log.d(TAG, "onFling animate");
-				aniStartPos = new Point((int) scrollX, (int) scrollY);
-				aniTime = 1000;
-				mState = BookState.ABOUT_TO_ANIMATE;
-				closeBook = true;
-				aniStartTime = new Date();
-				mBookView.startAnimation();
-			}
-			return false;
-		}
-
-		public void onLongPress(MotionEvent e) {
-			Log.d(TAG, "onLongPress");
-		}
-
-		public boolean onScroll(MotionEvent e1, MotionEvent e2,
-				float distanceX, float distanceY) {
-			mState = BookState.TRACKING;
-			if (mSelectCorner != Corner.None) {
-				scrollX = e2.getX();
-				scrollY = e2.getY();
-				Log.d(TAG,"scroll animation");
-				Log.d(TAG,"scrollx:"+scrollX+","+" scrolly:"+scrollY);
-				mBookView.startAnimation();
-			}
-			return false;
-		}
-
-		public void onShowPress(MotionEvent e) {
-			Log.d(TAG, "onShowPress");
-		}
-
-		public boolean onSingleTapUp(MotionEvent e) {
-			Log.d(TAG, "onSingleTapUp");
-
-			if (mSelectCorner != Corner.None) {
-				if (mSelectCorner == Corner.LeftTop) {
-					if (scrollX < contentWidth / 2) {
-						aniStopPos = new Point(0, 0);
-					} else {
-						//因为计算的时候分界线是一半，所以这里取的是两倍。才能到达全部翻页完
-						aniStopPos = new Point(0, 2*contentHeight);
-					}
-				} else if (mSelectCorner == Corner.RightTop) {
-					if (scrollX < contentWidth / 2) {
-						aniStopPos = new Point(contentWidth, 0);
-					} else {
-						aniStopPos = new Point(contentWidth, 2*contentHeight);
-					}
-				} else if (mSelectCorner == Corner.LeftBottom) {
-					if (scrollX < contentWidth / 2) {
-						aniStopPos = new Point(0, 0);
-					} else {
-						aniStopPos = new Point(0, contentHeight);
-					}
-				} else if (mSelectCorner == Corner.RightBottom) {
-					if (scrollX < contentWidth / 2) {
-						aniStopPos = new Point(contentWidth, -contentHeight);
-					} else {
-						aniStopPos = new Point(contentWidth, contentHeight);
-					}
-				}
-				aniStartPos = new Point((int) scrollX, (int) scrollY);
-				aniTime = 800;
-				mState = BookState.ABOUT_TO_ANIMATE;
-				closeBook = true;
-				aniStartTime = new Date();
-				mBookView.startAnimation();
-			}
-			return false;
-		}
-	}
-
 	@Override
 	protected void onFinishInflate() {
 		Log.d(TAG, "onFinishInflate");
@@ -506,44 +370,279 @@ public class FlipVerticalPageLayout extends FrameLayout {
 		mTouchListener = l;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
+	private boolean getAnimateData() {
+		Log.d(TAG, "getAnimateData");
+		long time = aniTime;
+		Date date = new Date();
+		long t = date.getTime() - aniStartTime.getTime();
+		t += timeOffset;
+		Log.i(TAG,scrollX+",scrollY:"+scrollY);
+		Log.i(TAG,"aniStopPos:"+aniStopPos+",aniStartPos:"+aniStartPos);
+		if (t < 0 || t > time) {
+			mState = BookState.ANIMATE_END;
+			return false;
+		} else {
+			mState = BookState.ANIMATING;
+			double sx = aniStopPos.x - aniStartPos.x;
+			scrollX = (float) (sx * t / time + aniStartPos.x);
+			double sy = aniStopPos.y - aniStartPos.y;
+			scrollY = (float) (sy * t / time + aniStartPos.y);
+			return true;
+		}
+	}
+
+	private void handleAniEnd(Canvas canvas) {
+		Log.d(TAG, "handleAniEnd");
+		if (closeBook) {
+			closeBook = false;
+			if ( mSelectCorner == Corner.RightBottom
+					|| mSelectCorner == Corner.LeftBottom) {
+				if (scrollY < contentHeight / 2) {
+					mBookView.drawPrevPageEnd(canvas);
+					aniEndHandle.post(new Runnable() {
+						public void run() {
+							updatePageView();
+						}
+					});
+				} else {
+					mBookView.doDraw(canvas);
+				}
+			} else if (mSelectCorner == Corner.LeftTop||mSelectCorner == Corner.RightTop
+					) {
+				if (scrollY > contentHeight / 2) {
+					mBookView.drawNextPageEnd(canvas);
+					aniEndHandle.post(new Runnable() {
+						public void run() {
+							updatePageView();
+						}
+					});
+				} else {
+					mBookView.doDraw(canvas);
+				}
+			}
+			mSelectCorner = Corner.None;
+			mState = BookState.READY;
+		} else {
+			mState = BookState.TRACKING;
+		}
+		mBookView.stopAnimation();
+	}
+
+	@Override
+	public void addView(View child, int index, ViewGroup.LayoutParams params) {
+		System.out
+				.println("addView(View child, int index, LayoutParams params)");
+		if (child == mBookView || child == invisibleLayout
+				|| child == mainLayout){
+			putChildToAgency(concrete);
+			super.addView(child, index, params);
+		}
+		else{
+			System.out.println("agency");
+			concrete.addView(child, index, params);
+		}
+	}
+
+	//把子视图添加到代理视图里面
+	private void putChildToAgency(ViewGroup agency){
+		View child ; 
+		for(int i = 0;i<getChildCount();++i){
+			child = getChildAt(i);
+			if(child!=null&&child!=mBookView&&child!=invisibleLayout
+					 &&child != mainLayout){
+				agency.addView(child, i, child.getLayoutParams());
+				System.out.println("add to agency ok");
+			}
+		}
+		for(int i = 0;i<getChildCount();++i){
+			child = getChildAt(i);
+			if(child!=null&&child!=mBookView&&child!=invisibleLayout
+					 &&child != mainLayout){
+				removeViewAt(i);
+				System.out.println("remove from parent ok");
+			}
+		}		
+	}
+
+	class BookOnGestureListener implements OnGestureListener {
+		public boolean onDown(MotionEvent event) {
+			Log.d(TAG, "onDown");
+			if (mState == BookState.ANIMATING)
+				return false;
+			float x = event.getX(), y = event.getY();
+			int w = contentWidth, h = contentHeight;
+			if (x * x + y * y < clickCornerLen) {
+				mSelectCorner = Corner.LeftTop;
+				aniStartPos = new Point(0, 0);
+			} else if ((x - w) * (x - w) + y * y < clickCornerLen) {
+				mSelectCorner = Corner.RightTop;
+				aniStartPos = new Point(contentWidth, 0);
+			} else if (x * x + (y - h) * (y - h) < clickCornerLen) {
+				mSelectCorner = Corner.LeftBottom;
+				aniStartPos = new Point(0, contentHeight);
+			} else if ((x - w) * (x - w) + (y - h) * (y - h) < clickCornerLen) {
+				mSelectCorner = Corner.RightBottom;
+				aniStartPos = new Point(contentWidth, contentHeight);
+			}
+			if (mSelectCorner != Corner.None) {
+				aniStopPos = new Point((int) x, (int) y);
+				aniTime = 800;
+				mState = BookState.ABOUT_TO_ANIMATE;
+				closeBook = false;
+				aniStartTime = new Date();
+				mBookView.startAnimation();
+			}
+			Log.i("ondown", "ondown");
+			return false;
+		}
+	
+		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+				float velocityY) {
+			Log.d(TAG, "onFling velocityX:" + velocityX + " velocityY:"
+					+ velocityY);
+			if (mSelectCorner != Corner.None) {
+				if (mSelectCorner == Corner.LeftTop) {
+					if (velocityY < 0) {
+						aniStopPos = new Point(0, 0);
+					} else {
+						//因为计算的时候分界线是一半，所以这里取的是两倍。才能到达全部翻页完
+						aniStopPos = new Point(0, 2*contentHeight);
+					}
+				} else if (mSelectCorner == Corner.RightTop) {
+					Log.i(TAG,"righttop velocityY:"+velocityY);
+					if (velocityY < 0) {//回滚
+						aniStopPos = new Point(contentWidth, 0);
+					} else {
+						aniStopPos = new Point(contentWidth, 2*contentHeight);
+					}
+				} else if (mSelectCorner == Corner.LeftBottom) {
+					if (velocityY < 0) { //翻页
+						aniStopPos = new Point(0, -contentHeight);
+					} else {
+						aniStopPos = new Point(0, contentHeight);
+					}
+				} else if (mSelectCorner == Corner.RightBottom) {
+					if (velocityY < 0) {//翻页
+						aniStopPos = new Point(contentWidth, -contentHeight);
+					} else {
+						aniStopPos = new Point(contentWidth, contentHeight);
+					}
+				}
+				Log.d(TAG, "onFling animate");
+				aniStartPos = new Point((int) scrollX, (int) scrollY);
+				aniTime = 1000;
+				mState = BookState.ABOUT_TO_ANIMATE;
+				closeBook = true;
+				aniStartTime = new Date();
+				mBookView.startAnimation();
+			}
+			return false;
+		}
+	
+		public void onLongPress(MotionEvent e) {
+			Log.d(TAG, "onLongPress");
+		}
+	
+		public boolean onScroll(MotionEvent e1, MotionEvent e2,
+				float distanceX, float distanceY) {
+			mState = BookState.TRACKING;
+			if (mSelectCorner != Corner.None) {
+				scrollX = e2.getX();
+				scrollY = e2.getY();
+				Log.d(TAG,"scroll animation");
+				Log.d(TAG,"scrollx:"+scrollX+","+" scrolly:"+scrollY);
+				mBookView.startAnimation();
+			}
+			return false;
+		}
+	
+		public void onShowPress(MotionEvent e) {
+			Log.d(TAG, "onShowPress");
+		}
+	
+		public boolean onSingleTapUp(MotionEvent e) {
+			Log.d(TAG, "onSingleTapUp");
+	
+			if (mSelectCorner != Corner.None) {
+				if (mSelectCorner == Corner.LeftTop) {
+					if (scrollY < contentHeight / 2) {
+						aniStopPos = new Point(0, 0);
+					} else {
+						//因为计算的时候分界线是一半，所以这里取的是两倍。才能到达全部翻页完
+						aniStopPos = new Point(0, 2*contentHeight);
+					}
+				} else if (mSelectCorner == Corner.RightTop) {
+					if (scrollY < contentHeight / 2) {
+						aniStopPos = new Point(contentWidth, 0);
+					} else {
+						aniStopPos = new Point(contentWidth, 2*contentHeight);
+					}
+				} else if (mSelectCorner == Corner.LeftBottom) {
+					if (scrollY < contentHeight / 2) {
+						aniStopPos = new Point(0, -contentHeight);
+					} else {
+						aniStopPos = new Point(0, contentHeight);
+					}
+				} else if (mSelectCorner == Corner.RightBottom) {
+					if (scrollY < contentHeight / 2) {
+						aniStopPos = new Point(contentWidth, -contentHeight);
+					} else {
+						aniStopPos = new Point(contentWidth, contentHeight);
+					}
+				}
+				aniStartPos = new Point((int) scrollX, (int) scrollY);
+				aniTime = 800;
+				mState = BookState.ABOUT_TO_ANIMATE;
+				closeBook = true;
+				aniStartTime = new Date();
+				mBookView.startAnimation();
+			}
+			return false;
+		}
+	}
+
 	class BookView extends SurfaceView implements SurfaceHolder.Callback {
 		// 绘制线程
 		DrawThread dt;
 		SurfaceHolder surfaceHolder;
 		Paint mDarkPaint = new Paint();
 		Paint mPaint = new Paint();
-
+	
 		// 临时背景图片
 		Bitmap tmpBmp = Bitmap.createBitmap(contentWidth, contentHeight,
 				Bitmap.Config.ARGB_8888);
 		// Bitmap tmpBmp = BitmapFactory.decodeResource(getResources(),
 		// R.drawable.temp);
 		Canvas mCanvas = new Canvas(tmpBmp);
-
+	
 		Paint bmpPaint = new Paint();
 		Paint ivisiblePaint = new Paint();
-
+	
 		public BookView(Context context) {
 			super(context);
 			surfaceHolder = getHolder();
 			surfaceHolder.addCallback(this);
-
+	
 			mDarkPaint.setColor(0x88000000);
 			Shader mLinearGradient = new LinearGradient(0, 0, contentWidth, 0,
 					new int[] { 0x00000000, 0x33000000, 0x00000000 },
 					new float[] { 0.35f, 0.5f, 0.65f }, Shader.TileMode.MIRROR);
 			mPaint.setAntiAlias(true);
 			mPaint.setShader(mLinearGradient);
-
+	
 			bmpPaint.setFilterBitmap(true);
 			bmpPaint.setAntiAlias(true);
-
+	
 			ivisiblePaint.setAlpha(0);
 			ivisiblePaint.setFilterBitmap(true);
 			ivisiblePaint.setAntiAlias(true);
 			ivisiblePaint.setXfermode(new PorterDuffXfermode(Mode.DST_IN));
 		}
-
+	
 		public void startAnimation() {
 			if (dt == null) {
 				Log.d(TAG, "startAnimation");
@@ -551,7 +650,7 @@ public class FlipVerticalPageLayout extends FrameLayout {
 				dt.start();
 			}
 		}
-
+	
 		public void stopAnimation() {
 			Log.d(TAG, "stopAnimation");
 			if (dt != null) {
@@ -561,59 +660,59 @@ public class FlipVerticalPageLayout extends FrameLayout {
 				t.interrupt();
 			}
 		}
-
+	
 		public void drawLT(Canvas canvas) {
 			double dx = contentWidth - scrollX, dy = scrollY;
 			double len = Math.sqrt(dx * dx + dy * dy);
-			if (len > contentWidth) {
-				scrollX = (float) (contentWidth - contentWidth * dx / len);
-				scrollY = (float) (contentWidth * dy / len);
-			}
-
+//			if (len > contentWidth) {
+//				scrollX = (float) (contentWidth - contentWidth * dx / len);
+//				scrollY = (float) (contentWidth * dy / len);
+//			}
+	
 			double px = scrollX;
 			double py = scrollY;
-			double arc = 2 * Math.atan(py / px) * 180 / Math.PI;
-
+			double arc =  Math.atan(px / py) * 180 / Math.PI;
+	
 			Matrix m = new Matrix();
-			m.postTranslate(scrollX - contentWidth, scrollY);
-			m.postRotate((float) (arc), scrollX, scrollY);
-
+			m.postTranslate(scrollX - contentWidth, scrollY-contentHeight);   //平移 对角平移
+			m.postRotate((float) ((90-2*arc)), scrollX, scrollY);
+	
 			middlePage.draw(mCanvas);
-
+	
 			Paint ps = new Paint();
-			Shader lg1 = new LinearGradient(contentWidth, 0, contentWidth
-					- (float) px, (float) py, new int[] { 0x00000000,
+			Shader lg1 = new LinearGradient(contentWidth-scrollY, contentHeight-scrollX, contentWidth,
+					contentHeight, new int[] { 0x00000000,
 					0x33000000, 0x00000000 },
 					new float[] { 0.35f, 0.5f, 0.65f }, Shader.TileMode.CLAMP);
 			ps.setShader(lg1);
 			mCanvas.drawRect(0, 0, contentWidth, contentHeight, ps);
 			canvas.drawBitmap(tmpBmp, m, bmpPaint);
-
+	
 			prevPage.draw(mCanvas);
 			Shader lg2 = new LinearGradient(scrollX, scrollY, 0, 0, new int[] {
 					0x00000000, 0x33000000, 0x00000000 }, new float[] { 0.35f,
 					0.5f, 0.65f }, Shader.TileMode.CLAMP);
 			ps.setShader(lg2);
 			mCanvas.drawRect(0, 0, contentWidth, contentHeight, ps);
-
-			arc = arc * Math.PI / 360;
+	
+			arc = arc * Math.PI / 180;
 			Path path = new Path();
 			double r = Math.sqrt(px * px + py * py);
-			double p1 = r / (2 * Math.cos(arc));
-			double p2 = r / (2 * Math.sin(arc));
+			double p1 = r / (2 * Math.sin(arc));
+			double p2 = r / (2 * Math.cos(arc));
 			Log.d(TAG, "p1: " + p1 + " p2:" + p2);
 			if (arc == 0) {
-				path.moveTo((float) p1, 0);
-				path.lineTo(contentWidth, 0);
+				path.moveTo(0, (float)p2);
+				path.lineTo(0, contentHeight);
 				path.lineTo(contentWidth, contentHeight);
-				path.lineTo((float) p1, contentHeight);
+				path.lineTo(0, (float)p2);
 				path.close();
-			} else if (p2 > contentHeight || p2 < 0) {
-				double p3 = (p2 - contentHeight) * Math.tan(arc);
-				path.moveTo((float) p1, 0);
-				path.lineTo(contentWidth, 0);
+			} else if (p1 > contentWidth || p1 < 0) {
+				double p3 = (p1 - contentWidth) * Math.tan(arc);
+				path.moveTo(contentWidth, (float)p3);
 				path.lineTo(contentWidth, contentHeight);
-				path.lineTo((float) p3, contentHeight);
+				path.lineTo(0, contentHeight);
+				path.lineTo(0,(float) p2);
 				path.close();
 			} else {
 				path.moveTo((float) p1, 0);
@@ -626,71 +725,72 @@ public class FlipVerticalPageLayout extends FrameLayout {
 			mCanvas.drawPath(path, ivisiblePaint);
 			canvas.drawBitmap(tmpBmp, 0, 0, null);
 		}
-
+	
 		public void drawLB(Canvas canvas) {
 			double dx = contentWidth - scrollX, dy = contentHeight - scrollY;
 			double len = Math.sqrt(dx * dx + dy * dy);
-			if (len > contentWidth) {
-				scrollX = (float) (contentWidth - contentWidth * dx / len);
-				scrollY = (float) (contentHeight - contentWidth * dy / len);
-			}
+//			if (len > contentWidth) {
+//				scrollX = (float) (contentWidth - contentWidth * dx / len);
+//				scrollY = (float) (contentHeight - contentWidth * dy / len);
+//			}
 			double px = scrollX;
 			double py = contentHeight - scrollY;
-			double arc = 2 * Math.atan(py / px) * 180 / Math.PI;
-
+			double arc = Math.atan(px / py) * 180 / Math.PI;	//
+	
 			Matrix m = new Matrix();
-			m.postTranslate(scrollX - contentWidth, scrollY - contentHeight);
-			m.postRotate((float) (-arc), scrollX, scrollY);
-
+			m.postTranslate(scrollX - contentWidth, scrollY);
+			m.postRotate((float) (-(90-2*arc)), scrollX, scrollY);
+	
 			middlePage.draw(mCanvas);
-
+	
 			Paint ps = new Paint();
-			Shader lg1 = new LinearGradient(contentWidth, contentHeight,
-					contentWidth - (float) px, contentHeight - (float) py,
+			Shader lg1 = new LinearGradient(contentWidth,0,contentWidth-(float)py,(float) px,
 					new int[] { 0x00000000, 0x33000000, 0x00000000 },
 					new float[] { 0.35f, 0.5f, 0.65f }, Shader.TileMode.CLAMP);
 			ps.setShader(lg1);
 			mCanvas.drawRect(0, 0, contentWidth, contentHeight, ps);
 			canvas.drawBitmap(tmpBmp, m, bmpPaint);
-
+	
 			prevPage.draw(mCanvas);
 			Shader lg2 = new LinearGradient(scrollX, scrollY, 0, contentHeight,
 					new int[] { 0x00000000, 0x33000000, 0x00000000 },
 					new float[] { 0.35f, 0.5f, 0.65f }, Shader.TileMode.CLAMP);
 			ps.setShader(lg2);
 			mCanvas.drawRect(0, 0, contentWidth, contentHeight, ps);
-
-			arc = arc * Math.PI / 360;
+	
+			arc = arc * Math.PI / 180;
 			Path path = new Path();
 			double r = Math.sqrt(px * px + py * py);
-			double p1 = r / (2 * Math.cos(arc));
-			double p2 = r / (2 * Math.sin(arc));
-			Log.d(TAG, "p1: " + p1 + " p2:" + p2);
+			double p1 = r / (2 * Math.sin(arc));
+			double p2 = contentHeight - r / (2 * Math.cos(arc));
+			Log.d(TAG,"lt "+ "p1: " + p1 + " p2:" + p2+" math.tan:"+Math.tan(arc)+" r:"+r);
+			Log.d(TAG,"lt contentWidth:"+contentWidth);
 			if (arc == 0) {
-				path.moveTo((float) p1, 0);
+				path.moveTo(0, 0);
 				path.lineTo(contentWidth, 0);
-				path.lineTo(contentWidth, contentHeight);
-				path.lineTo((float) p1, contentHeight);
+				path.lineTo(contentWidth, (float) (contentHeight-p2));
+				path.lineTo(0, (float) (contentHeight-p2));
 				path.close();
-			} else if (p2 > contentHeight || p2 < 0) {
-				double p3 = (p2 - contentHeight) * Math.tan(arc);
-				path.moveTo((float) p3, 0);
+			} else if (p1 > contentWidth || p1 < 0) {
+				double p3 = contentHeight - (p1 - contentWidth) * Math.tan(arc);
+				path.moveTo(contentWidth,(float) p3);
 				path.lineTo(contentWidth, 0);
-				path.lineTo(contentWidth, contentHeight);
-				path.lineTo((float) p1, contentHeight);
+				path.lineTo(0, 0);
+				path.lineTo(0,(float) p2);
 				path.close();
+				Log.d(TAG,"lt "+ " p2:" + p2+" p3:"+p3);
 			} else {
 				path.moveTo(0, 0);
 				path.lineTo(contentWidth, 0);
 				path.lineTo(contentWidth, contentHeight);
 				path.lineTo((float) p1, contentHeight);
-				path.lineTo(0, contentHeight - (float) p2);
+				path.lineTo(0, (float) p2);
 				path.close();
 			}
 			mCanvas.drawPath(path, ivisiblePaint);
 			canvas.drawBitmap(tmpBmp, 0, 0, null);
 		}
-
+	
 		/**
 		 * 点击点在右上角
 		 * @param canvas
@@ -698,23 +798,22 @@ public class FlipVerticalPageLayout extends FrameLayout {
 		public void drawRT(Canvas canvas) {
 			double dx = scrollX, dy = scrollY;
 			double len = Math.sqrt(dx * dx + dy * dy);
-			if (len > contentHeight) {			//目的似乎很大，没明白
-				scrollX = (float) (contentHeight * dx / len);
-				scrollY = (float) (contentHeight * dy / len);
-			}
+//			if (len > contentHeight) {			//目的似乎很大，没明白
+//				scrollX = (float) (contentHeight * dx / len);
+//				scrollY = (float) (contentHeight * dy / len);
+//			}
 			//计算点击点距离最近顶点的x,y的距离
 			double px = contentWidth - scrollX;
 			double py = scrollY;
-			double arc = 2 * Math.atan(px / py) * 180 / Math.PI;
+			double arc = Math.atan(px / py) * 180 / Math.PI;
 			Log.d(TAG,"px:"+px+" py:"+py+" arc:"+arc);
 			Matrix m = new Matrix();
 			m.postTranslate(scrollX, scrollY-contentHeight);
-			m.postRotate((float) (-(90-arc)), scrollX, scrollY);
+			m.postRotate((float) (-(90-arc*2)), scrollX, scrollY);
 			
 			middlePage.draw(mCanvas);
 			Paint ps = new Paint();
-			Shader lg1 = new LinearGradient(0, 0,
-					(float) px, (float) py,
+			Shader lg1 = new LinearGradient(0,contentHeight,(float)py,contentHeight -(float) px,
 					new int[] { 0x00000000, 0x33000000, 0x00000000 },
 					new float[] { 0.35f, 0.5f, 0.65f }, Shader.TileMode.CLAMP);
 			ps.setShader(lg1);
@@ -723,14 +822,15 @@ public class FlipVerticalPageLayout extends FrameLayout {
 			
 			nextPage.draw(mCanvas);
 			//阴影
-			Shader lg2 = new LinearGradient( contentWidth, 0,
-					contentWidth - (float) px,(float) py,  new int[] { 0x00000000, 0x33000000,
+			Shader lg2 = new LinearGradient( 
+					contentWidth - (float) px,(float) py,contentWidth, 0,
+					  new int[] { 0x00000000, 0x33000000,
 							0x00000000 }, new float[] { 0.35f, 0.5f, 0.65f },
 					Shader.TileMode.CLAMP);
 			ps.setShader(lg2);
 			mCanvas.drawRect(0, 0, contentWidth, contentHeight, ps);
-
-			arc = arc * Math.PI / 360;			//变成弧度制
+	
+			arc = arc * Math.PI / 180;			//变成弧度制
 			Path path = new Path();
 			double r = Math.sqrt(px * px + py * py);			//顶点与触摸点的距离
 			double p1 = contentWidth - r / (2 * Math.sin(arc));			//x方向的点
@@ -808,39 +908,39 @@ public class FlipVerticalPageLayout extends FrameLayout {
 		public void drawRB(Canvas canvas) {
 			double dx = scrollX, dy = contentHeight - scrollY;
 			double len = Math.sqrt(dx * dx + dy * dy);
-			if (len > contentWidth) {
-				scrollX = (float) (contentWidth * dx / len);
-				scrollY = (float) (contentHeight - contentWidth * dy / len);
-			}
-
+//			if (len > contentWidth) {
+//				scrollX = (float) (contentWidth * dx / len);
+//				scrollY = (float) (contentHeight - contentWidth * dy / len);
+//			}
+	
 			double px = contentWidth - scrollX;
 			double py = contentHeight - scrollY;
-			double arc = 2 * Math.atan(px / py) * 180 / Math.PI;
-
+			double arc = Math.atan(px / py) * 180 / Math.PI;			//不同的
+	
 			Matrix m = new Matrix();
-			m.postTranslate(scrollX, scrollY - contentHeight);
-			m.postRotate((float) (arc), scrollX, scrollY);
-
+			m.postTranslate(scrollX, scrollY);
+			m.postRotate((float) (90-2*arc), scrollX, scrollY);
+	
 			middlePage.draw(mCanvas);
-
+	
 			Paint ps = new Paint();
-			Shader lg1 = new LinearGradient(0, contentHeight, (float) px,
-					contentHeight - (float) py, new int[] { 0x00000000,
+			Shader lg1 = new LinearGradient(0, 0,
+					(float) py,  (float) px,new int[] { 0x00000000,
 							0x33000000, 0x00000000 }, new float[] { 0.35f,
 							0.5f, 0.65f }, Shader.TileMode.CLAMP);
 			ps.setShader(lg1);
 			mCanvas.drawRect(0, 0, contentWidth, contentHeight, ps);
 			canvas.drawBitmap(tmpBmp, m, bmpPaint);
-
+	
 			nextPage.draw(mCanvas);
-			Shader lg2 = new LinearGradient(scrollX - contentWidth, scrollY,
+			Shader lg2 = new LinearGradient(scrollX, scrollY,
 					contentWidth, contentHeight, new int[] { 0x00000000,
 							0x33000000, 0x00000000 }, new float[] { 0.35f,
 							0.5f, 0.65f }, Shader.TileMode.CLAMP);
 			ps.setShader(lg2);
 			mCanvas.drawRect(0, 0, contentWidth, contentHeight, ps);
-
-			arc = arc * Math.PI / 360;
+	
+			arc = arc * Math.PI / 180;
 			Path path = new Path();
 			double r = Math.sqrt(px * px + py * py);
 			double p1 = contentWidth - r / (2 * Math.sin(arc));
@@ -870,17 +970,17 @@ public class FlipVerticalPageLayout extends FrameLayout {
 			mCanvas.drawPath(path, ivisiblePaint);
 			canvas.drawBitmap(tmpBmp, 0, 0, null);
 		}
-
+	
 		public void drawPrevPageEnd(Canvas canvas) {
 			prevPage.draw(mCanvas);
 			canvas.drawBitmap(tmpBmp, 0, 0, null);
 		}
-
+	
 		public void drawNextPageEnd(Canvas canvas) {
 			nextPage.draw(mCanvas);
 			canvas.drawBitmap(tmpBmp, contentWidth, 0, null);
 		}
-
+	
 		public void drawPage(Canvas canvas) {
 			if (mSelectCorner == Corner.LeftTop) {
 				Log.d(TAG, "click left top");
@@ -896,7 +996,7 @@ public class FlipVerticalPageLayout extends FrameLayout {
 				drawRB(canvas);
 			}
 		}
-
+	
 		public void update() {
 			Canvas canvas = surfaceHolder.lockCanvas(null);
 			try {
@@ -911,7 +1011,7 @@ public class FlipVerticalPageLayout extends FrameLayout {
 				}
 			}
 		}
-
+	
 		private void doDraw(Canvas canvas) {
 			Log.d(TAG, "bookView doDraw");
 			mainLayout.draw(canvas);
@@ -920,7 +1020,7 @@ public class FlipVerticalPageLayout extends FrameLayout {
 		@Override
 		public void surfaceChanged(SurfaceHolder holder, int format, int width,
 				int height) {
-
+	
 		}
 		@Override
 		public void surfaceCreated(SurfaceHolder holder) {
@@ -934,68 +1034,6 @@ public class FlipVerticalPageLayout extends FrameLayout {
 			}
 			Log.i(TAG,"sufaceDestroyed");
 		}
-	}
-
-	/**
-	 * 获得运行时的动画，scroll 状态数据
-	 * 
-	 * @return
-	 */
-	private boolean getAnimateData() {
-		Log.d(TAG, "getAnimateData");
-		long time = aniTime;
-		Date date = new Date();
-		long t = date.getTime() - aniStartTime.getTime();
-		t += timeOffset;
-		if (t < 0 || t > time) {
-			mState = BookState.ANIMATE_END;
-			return false;
-		} else {
-			mState = BookState.ANIMATING;
-			double sx = aniStopPos.x - aniStartPos.x;
-			scrollX = (float) (sx * t / time + aniStartPos.x);
-			double sy = aniStopPos.y - aniStartPos.y;
-			scrollY = (float) (sy * t / time + aniStartPos.y);
-			return true;
-		}
-	}
-
-	private void handleAniEnd(Canvas canvas) {
-		Log.d(TAG, "handleAniEnd");
-		if (closeBook) {
-			closeBook = false;
-			if (mSelectCorner == Corner.LeftTop
-					|| mSelectCorner == Corner.LeftBottom) {
-				if (scrollX > contentWidth / 2) {
-					mBookView.drawPrevPageEnd(canvas);
-					aniEndHandle.post(new Runnable() {
-						public void run() {
-							updatePageView();
-						}
-					});
-				} else {
-					mBookView.doDraw(canvas);
-				}
-			} else if (mSelectCorner == Corner.RightTop
-					|| mSelectCorner == Corner.RightBottom) {
-				if (scrollX < contentWidth / 2) {
-					mBookView.drawNextPageEnd(canvas);
-					aniEndHandle.post(new Runnable() {
-						public void run() {
-							updatePageView();
-						}
-					});
-				} else {
-					mBookView.doDraw(canvas);
-				}
-			}
-			mSelectCorner = Corner.None;
-			mState = BookState.READY;
-		} else {
-			mState = BookState.TRACKING;
-		}
-		mBookView.stopAnimation();
-		
 	}
 
 	public class DrawThread extends Thread {
@@ -1021,6 +1059,7 @@ public class FlipVerticalPageLayout extends FrameLayout {
 					synchronized (surfaceHolder) {
 						if (mState == BookState.ABOUT_TO_ANIMATE
 								|| mState == BookState.ANIMATING) {
+							Log.i(TAG,"mState == BookState.ABOUT_TO_ANIMATE|| mState == BookState.ANIMATING");
 							bv.doDraw(canvas);
 							getAnimateData();
 							bv.drawPage(canvas);
@@ -1045,41 +1084,5 @@ public class FlipVerticalPageLayout extends FrameLayout {
 				}
 			}
 		}
-	}
-	
-	@Override
-	public void addView(View child, int index, ViewGroup.LayoutParams params) {
-		System.out
-				.println("addView(View child, int index, LayoutParams params)");
-		if (child == mBookView || child == invisibleLayout
-				|| child == mainLayout){
-			putChildToAgency(concrete);
-			super.addView(child, index, params);
-		}
-		else{
-			System.out.println("agency");
-			concrete.addView(child, index, params);
-		}
-	}
-	
-	//把子视图添加到代理视图里面
-	private void putChildToAgency(ViewGroup agency){
-		View child ; 
-		for(int i = 0;i<getChildCount();++i){
-			child = getChildAt(i);
-			if(child!=null&&child!=mBookView&&child!=invisibleLayout
-					 &&child != mainLayout){
-				agency.addView(child, i, child.getLayoutParams());
-				System.out.println("add to agency ok");
-			}
-		}
-		for(int i = 0;i<getChildCount();++i){
-			child = getChildAt(i);
-			if(child!=null&&child!=mBookView&&child!=invisibleLayout
-					 &&child != mainLayout){
-				removeViewAt(i);
-				System.out.println("remove from parent ok");
-			}
-		}		
 	}
 }
