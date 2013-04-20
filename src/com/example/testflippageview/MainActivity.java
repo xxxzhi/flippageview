@@ -7,6 +7,7 @@ import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
@@ -14,6 +15,14 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		FlipVerticalPageLayout page = (FlipVerticalPageLayout)findViewById(R.id.flip);
+		TextView next = new TextView(this);
+		next.setText("不保存");
+		page.setNextPageBack(next);
+		
+		TextView pre = new TextView(this);
+		next.setText("保存");
+		page.setNextPageBack(next);
 	}
 
 	@Override

@@ -65,21 +65,36 @@ public class FlipPageLayout extends FrameLayout {
 	public interface OnCrawlListener{
 		
 		/**
-		 * 向左，也就是prev 翻页
+		 * 向左，也就是prev 翻页 在手指离开并且启动翻页的时候会触发
 		 */
-		public void onCrawlLeftListener();
+		public void onCrawlPreListener();
 		
 		/**
-		 * 向右，也就是next 翻页
+		 * 向右，也就是next 翻页 在手指离开并且启动翻页的时候会触发
 		 */
-		public void onCrawlRightListener();
+		public void onCrawlNextListener();
 		 
 		/**
 		 * 动画结束时将会被调用
 		 */
 		public void onCrawlEndListener();
 	}
-	private OnCrawlListener mOnCrawlListener = null;
+	private OnCrawlListener mOnCrawlListener = new OnCrawlListener() {
+		@Override
+		public void onCrawlPreListener() {
+			Log.i(TAG,"default onCrawlPreListener");
+		}
+		
+		@Override
+		public void onCrawlNextListener() {
+			Log.i(TAG,"default onCrawlNextListener");
+		}
+		
+		@Override
+		public void onCrawlEndListener() {
+			Log.i(TAG,"default onCrawlEndListener");
+		}
+	};
 	/**
 	 * @param monCrawlListener the monCrawlListener to set
 	 */
@@ -251,7 +266,7 @@ public class FlipPageLayout extends FrameLayout {
 	 * @param v
 	 */
 	public void setNextPageBack(View v){
-		prevPage = v;
+		nextPage = v;
 	}
 	
 	@Override
@@ -275,43 +290,48 @@ public class FlipPageLayout extends FrameLayout {
 							+ " mState:" + mState);
 			mGestureDetector.onTouchEvent(event);
 			int action = event.getAction();
-			if (action == MotionEvent.ACTION_UP && mSelectCorner != Corner.None
-					&& mState == BookState.TRACKING) {
-				if (mState == BookState.ANIMATING)
-					return false;
-				if (mSelectCorner == Corner.LeftTop) {
-					if (scrollX < contentWidth / 2) {
-						aniStopPos = new Point(0, 0);
-					} else {
-						aniStopPos = new Point(2 * contentWidth, 0);
+			if (action == MotionEvent.ACTION_UP){
+				if (mSelectCorner != Corner.None
+						&& mState == BookState.TRACKING) {
+					if (mState == BookState.ANIMATING)
+						return false;
+					if (mSelectCorner == Corner.LeftTop) {
+						if (scrollX < contentWidth / 2) {
+							aniStopPos = new Point(0, 0);
+						} else {
+							mOnCrawlListener.onCrawlPreListener();
+							aniStopPos = new Point(2 * contentWidth, 0);
+						}
+					} else if (mSelectCorner == Corner.RightTop) {
+						if (scrollX < contentWidth / 2) {
+							mOnCrawlListener.onCrawlNextListener();
+							aniStopPos = new Point(-contentWidth, 0);
+						} else {
+							aniStopPos = new Point(contentWidth, 0);
+						}
+					} else if (mSelectCorner == Corner.LeftBottom) {
+						if (scrollX < contentWidth / 2) {
+							aniStopPos = new Point(0, contentHeight);
+						} else {
+							mOnCrawlListener.onCrawlPreListener();
+							aniStopPos = new Point(2 * contentWidth, contentHeight);
+						}
+					} else if (mSelectCorner == Corner.RightBottom) {
+						if (scrollX < contentWidth / 2) {
+							mOnCrawlListener.onCrawlNextListener();
+							aniStopPos = new Point(-contentWidth, contentHeight);
+						} else {
+							aniStopPos = new Point(contentWidth, contentHeight);
+						}
 					}
-				} else if (mSelectCorner == Corner.RightTop) {
-					if (scrollX < contentWidth / 2) {
-						aniStopPos = new Point(-contentWidth, 0);
-					} else {
-						aniStopPos = new Point(contentWidth, 0);
-					}
-				} else if (mSelectCorner == Corner.LeftBottom) {
-					if (scrollX < contentWidth / 2) {
-						aniStopPos = new Point(0, contentHeight);
-					} else {
-						aniStopPos = new Point(2 * contentWidth, contentHeight);
-					}
-				} else if (mSelectCorner == Corner.RightBottom) {
-					if (scrollX < contentWidth / 2) {
-						aniStopPos = new Point(-contentWidth, contentHeight);
-					} else {
-						aniStopPos = new Point(contentWidth, contentHeight);
-					}
+					aniStartPos = new Point((int) scrollX, (int) scrollY);
+					aniTime = 800;
+					mState = BookState.ABOUT_TO_ANIMATE;
+					closeBook = true;
+					aniStartTime = new Date();
+					mBookView.startAnimation();
 				}
-				aniStartPos = new Point((int) scrollX, (int) scrollY);
-				aniTime = 800;
-				mState = BookState.ABOUT_TO_ANIMATE;
-				closeBook = true;
-				aniStartTime = new Date();
-				mBookView.startAnimation();
 			}
-
 			return ret;
 		}
 	};
@@ -357,10 +377,12 @@ public class FlipPageLayout extends FrameLayout {
 					if (velocityX < 0) {
 						aniStopPos = new Point(0, 0);
 					} else {
+						mOnCrawlListener.onCrawlPreListener();
 						aniStopPos = new Point(2 * contentWidth, 0);
 					}
 				} else if (mSelectCorner == Corner.RightTop) {
 					if (velocityX < 0) {
+						mOnCrawlListener.onCrawlNextListener();
 						aniStopPos = new Point(-contentWidth, 0);
 					} else {
 						aniStopPos = new Point(contentWidth, 0);
@@ -369,10 +391,12 @@ public class FlipPageLayout extends FrameLayout {
 					if (velocityX < 0) {
 						aniStopPos = new Point(0, contentHeight);
 					} else {
+						mOnCrawlListener.onCrawlPreListener();
 						aniStopPos = new Point(2 * contentWidth, contentHeight);
 					}
 				} else if (mSelectCorner == Corner.RightBottom) {
 					if (velocityX < 0) {
+						mOnCrawlListener.onCrawlNextListener();
 						aniStopPos = new Point(-contentWidth, contentHeight);
 					} else {
 						aniStopPos = new Point(contentWidth, contentHeight);
@@ -698,7 +722,7 @@ public class FlipPageLayout extends FrameLayout {
 			canvas.drawBitmap(tmpBmp, m, bmpPaint);
 
 			nextPage.draw(mCanvas);
-			Shader lg2 = new LinearGradient(scrollX - contentWidth, scrollY,
+			Shader lg2 = new LinearGradient(scrollX, scrollY,
 					contentWidth, 0, new int[] { 0x00000000, 0x33000000,
 							0x00000000 }, new float[] { 0.35f, 0.5f, 0.65f },
 					Shader.TileMode.CLAMP);

@@ -10,8 +10,8 @@
 
     <com.example.testflippageview.FlipVerticalPageLayout
         android:id="@+id/flip"
-        android:layout_width="match_parent"
-    	android:layout_height="match_parent"
+        android:layout_width="200dp"
+    	android:layout_height="200dp"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_marginLeft="18dp"

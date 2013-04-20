@@ -69,21 +69,37 @@ public class FlipVerticalPageLayout extends FrameLayout {
 	public interface OnCrawlListener{
 		
 		/**
-		 * 向左，也就是prev 翻页
+		 * prev 翻页
 		 */
-		public void onCrawlLeftListener();
+		public void onCrawlPreListener();
 		
 		/**
 		 * 向右，也就是next 翻页
 		 */
-		public void onCrawlRightListener();
+		public void onCrawlNextListener();
 		 
 		/**
 		 * 动画结束时将会被调用
 		 */
 		public void onCrawlEndListener();
 	}
-	private OnCrawlListener mOnCrawlListener = null;
+	private OnCrawlListener mOnCrawlListener = new OnCrawlListener() {
+		
+		@Override
+		public void onCrawlPreListener() {
+			Log.i(TAG,"default onCrawlPreListener");
+		}
+		
+		@Override
+		public void onCrawlNextListener() {
+			Log.i(TAG,"default onCrawlNextListener");
+		}
+		
+		@Override
+		public void onCrawlEndListener() {
+			Log.i(TAG,"default onCrawlEndListener");
+		}
+	};
 	/**
 	 * @param monCrawlListener the monCrawlListener to set
 	 */
@@ -265,7 +281,7 @@ public class FlipVerticalPageLayout extends FrameLayout {
 	 * @param v
 	 */
 	public void setNextPageBack(View v){
-		prevPage = v;
+		nextPage = v;
 	}
 	
 	@Override
@@ -298,22 +314,26 @@ public class FlipVerticalPageLayout extends FrameLayout {
 						aniStopPos = new Point(0, 0);
 					} else {
 						//因为计算的时候分界线是一半，所以这里取的是两倍。才能到达全部翻页完
+						mOnCrawlListener.onCrawlPreListener();
 						aniStopPos = new Point(0, 2*contentHeight);
 					}
 				} else if (mSelectCorner == Corner.RightTop) {
 					if (scrollY < contentHeight / 2) {
 						aniStopPos = new Point(contentWidth, 0);
 					} else {
+						mOnCrawlListener.onCrawlPreListener();
 						aniStopPos = new Point(contentWidth, 2*contentHeight);
 					}
 				} else if (mSelectCorner == Corner.LeftBottom) {
 					if (scrollX < contentWidth / 2) {
+						mOnCrawlListener.onCrawlNextListener();
 						aniStopPos = new Point(0, -contentHeight);
 					} else {
 						aniStopPos = new Point(0, contentHeight);
 					}
 				} else if (mSelectCorner == Corner.RightBottom) {
 					if (scrollX < contentWidth / 2) {
+						mOnCrawlListener.onCrawlNextListener();
 						aniStopPos = new Point(contentWidth, -contentHeight);
 					} else {
 						aniStopPos = new Point(contentWidth, contentHeight);
@@ -510,6 +530,7 @@ public class FlipVerticalPageLayout extends FrameLayout {
 						aniStopPos = new Point(0, 0);
 					} else {
 						//因为计算的时候分界线是一半，所以这里取的是两倍。才能到达全部翻页完
+						mOnCrawlListener.onCrawlPreListener();
 						aniStopPos = new Point(0, 2*contentHeight);
 					}
 				} else if (mSelectCorner == Corner.RightTop) {
@@ -517,16 +538,19 @@ public class FlipVerticalPageLayout extends FrameLayout {
 					if (velocityY < 0) {//回滚
 						aniStopPos = new Point(contentWidth, 0);
 					} else {
+						mOnCrawlListener.onCrawlPreListener();
 						aniStopPos = new Point(contentWidth, 2*contentHeight);
 					}
 				} else if (mSelectCorner == Corner.LeftBottom) {
 					if (velocityY < 0) { //翻页
+						mOnCrawlListener.onCrawlNextListener();
 						aniStopPos = new Point(0, -contentHeight);
 					} else {
 						aniStopPos = new Point(0, contentHeight);
 					}
 				} else if (mSelectCorner == Corner.RightBottom) {
 					if (velocityY < 0) {//翻页
+						mOnCrawlListener.onCrawlNextListener();
 						aniStopPos = new Point(contentWidth, -contentHeight);
 					} else {
 						aniStopPos = new Point(contentWidth, contentHeight);
@@ -798,10 +822,10 @@ public class FlipVerticalPageLayout extends FrameLayout {
 		public void drawRT(Canvas canvas) {
 			double dx = scrollX, dy = scrollY;
 			double len = Math.sqrt(dx * dx + dy * dy);
-//			if (len > contentHeight) {			//目的似乎很大，没明白
-//				scrollX = (float) (contentHeight * dx / len);
-//				scrollY = (float) (contentHeight * dy / len);
-//			}
+			if (len > contentHeight) {			//目的似乎很大，没明白
+				scrollX = (float) (contentHeight * dx / len);
+				scrollY = (float) (contentHeight * dy / len);
+			}
 			//计算点击点距离最近顶点的x,y的距离
 			double px = contentWidth - scrollX;
 			double py = scrollY;
@@ -818,7 +842,8 @@ public class FlipVerticalPageLayout extends FrameLayout {
 					new float[] { 0.35f, 0.5f, 0.65f }, Shader.TileMode.CLAMP);
 			ps.setShader(lg1);
 			mCanvas.drawRect(0, 0, contentWidth, contentHeight, ps);
-			canvas.drawBitmap(tmpBmp, m, bmpPaint);
+			
+//			canvas.drawBitmap(tmpBmp, m, bmpPaint);
 			
 			nextPage.draw(mCanvas);
 			//阴影
@@ -836,7 +861,7 @@ public class FlipVerticalPageLayout extends FrameLayout {
 			double p1 = contentWidth - r / (2 * Math.sin(arc));			//x方向的点
 			double p2 = r / (2 * Math.cos(arc));						//y方向的点
 			Log.d(TAG, "p1: " + p1 + " p2:" + p2+" math.sin:"+Math.sin(arc)+" r:"+r);
-			Log.d(TAG,"contentWidth:"+contentWidth);
+			Log.d(TAG,"contentWidth:"+contentWidth+",contentHeight:"+contentHeight);
 			double p3 =0;
 			if (arc ==0) {
 				//相当于水平或者垂直滑动
@@ -859,7 +884,8 @@ public class FlipVerticalPageLayout extends FrameLayout {
 			} else {
 				path.moveTo(0, 0);
 				path.lineTo((float) p1, 0);
-				path.lineTo(contentWidth, (float) p2);
+				if(p2>0&&p2<contentHeight)
+					path.lineTo(contentWidth, (float) p2);
 				path.lineTo(contentWidth, contentHeight);
 				path.lineTo(0, contentHeight);
 				path.close();
